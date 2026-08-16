@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>choose a visual · shifting in motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="choose.css">
+</head>
+<body>
+
+<header class="chooser-head">
+  <a class="backlink" href="index.html">&larr; back</a>
+  <h1>choose a visual</h1>
+  <p>you can change it at any time, and reshape it from inside.</p>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<script type="module">
+  import { styles } from './styles/index.js';
+  import { createPhantom } from './phantom.js';
+  import { resolve } from './modulation.js';
+
+  const grid = document.getElementById('grid');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const panels = [];
+
+  styles.forEach((style, i) => {
+    const a = document.createElement('a');
+    a.className = 'panel';
+    a.href = `tool.html?style=${style.id}`;
+    a.innerHTML = `
+      <canvas></canvas>
+      <div class="meta">
+        <em>${String(i + 1).padStart(2, '0')}</em>
+        <strong>${style.label}</strong>
+        <span>${style.caption}</span>
+      </div>`;
+    grid.appendChild(a);
+
+    const canvas = a.querySelector('canvas');
+    // Each preview gets its own dancer, offset in time so the four panels
+    // are never in lockstep.
+    panels.push({
+      style,
+      canvas,
+      ctx: canvas.getContext('2d', { alpha: false }),
+      tick: createPhantom({ limbs: 2, seed: 3 + i * 11, tempo: 0.85 + i * 0.12 }),
+      offset: i * 4200,
+      frame: { w: 0, h: 0, t: 0 },
+    });
+  });
+
+  function size() {
+    const dpr = Math.min(devicePixelRatio || 1, 1.6);
+    for (const p of panels) {
+      const r = p.canvas.getBoundingClientRect();
+      p.canvas.width = Math.round(r.width * dpr);
+      p.canvas.height = Math.round(r.height * dpr);
+      p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      p.frame.w = r.width;
+      p.frame.h = r.height;
+      p.style.reset?.();
+    }
+  }
+  addEventListener('resize', size);
+  size();
+
+  // Styles share module-level scratch buffers, so panels are drawn one after
+  // another within a frame rather than interleaved.
+  function loop(now) {
+    for (const p of panels) {
+      const t = now + p.offset;
+      const sig = p.tick(t);
+      p.frame.t = t;
+      p.style.reset?.();
+      p.style.draw(p.ctx, sig, resolve(p.style, sig), p.frame);
+    }
+    if (!reduced) requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+</script>
+</body>
+</html>

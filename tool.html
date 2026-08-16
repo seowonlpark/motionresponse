@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>shifting in motion · the instrument</title>
+<meta name="description" content="Physical motion translated to visual effects. Pose tracking turns movement into colour, shape and spin in real time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="backdrop" aria-hidden="true"></div>
+
+<main id="gate" class="gate">
+  <div class="gate-inner">
+    <h1>the instrument</h1>
+    <p class="sub">
+      Stand where the camera can see your shoulders and your hands. It reads how
+      far you reach, how sharply you fold, and which way you sweep, and gives all
+      of it back as pattern.
+    </p>
+
+    <button id="begin" type="button" class="enter">
+      <span class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 44 12" fill="none">
+          <path d="M0 6h40M34 1l6 5-6 5" stroke="currentColor" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="label">open the camera</span>
+    </button>
+
+    <p class="fine">it uses your camera. nothing leaves this machine. nothing is recorded.</p>
+    <p class="fine" id="status" role="status" aria-live="polite"></p>
+
+    <div id="fallback" class="fine">
+      <a class="linkish" id="watch" href="#">continue without a camera</a>
+    </div>
+
+    <p class="fine dim">press D once running to read the signal plate</p>
+    <a class="backlink" href="choose.html">&larr; choose another visual</a>
+  </div>
+</main>
+
+<section id="stage" class="stage" hidden>
+  <canvas id="view" aria-label="The kaleidoscope, driven by your movement"></canvas>
+</section>
+
+<script type="module">
+  import { createBackdrop } from './backdrop.js';
+  createBackdrop(document.getElementById('backdrop'), { chroma: 0.4, speed: 0.03 });
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>

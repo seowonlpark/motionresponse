@@ -1,0 +1,272 @@
+/* style.css
+   The instrument. Same voice as the landing page: clean sans, black type,
+   all movement in the imagery rather than the interface. */
+
+:root {
+  --sans: 'Archivo', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --black: #0B0B0D;
+  --field: #f6f6f7;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--field);
+  color: var(--black);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#backdrop { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+
+:focus-visible { outline: 2px solid var(--black); outline-offset: 4px; }
+
+/* ---------- gate ---------- */
+
+.gate {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  padding: 8vh clamp(1.75rem, 7vw, 7rem);
+  transition: opacity .7s ease;
+}
+.gate.opening { opacity: .25; pointer-events: none; }
+.gate.open { display: none; }
+
+.gate-inner { max-width: 34rem; }
+
+h1 {
+  margin: 0;
+  font-weight: 500;
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  line-height: .95;
+  letter-spacing: -.04em;
+}
+
+.sub {
+  margin: 1.4rem 0 0;
+  font-size: clamp(.95rem, 1.5vw, 1.1rem);
+  line-height: 1.55;
+  max-width: 34ch;
+}
+
+.enter {
+  margin-top: clamp(2.4rem, 6vh, 4rem);
+  display: inline-flex;
+  align-items: center;
+  gap: .9rem;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0 0 .55rem;
+  color: var(--black);
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: border-color .5s cubic-bezier(.22,1,.36,1);
+}
+.glyph {
+  display: block; width: 2.75rem; flex: 0 0 auto; color: var(--black);
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+.glyph svg { display: block; width: 100%; }
+.label {
+  font-size: .95rem; letter-spacing: .01em; white-space: nowrap; color: var(--black);
+  opacity: 0; transform: translateX(-.7rem);
+  transition: opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);
+}
+.enter:hover, .enter:focus-visible { border-bottom-color: var(--black); }
+.enter:hover .glyph, .enter:focus-visible .glyph { transform: translateX(.55rem); }
+.enter:hover .label, .enter:focus-visible .label { opacity: 1; transform: translateX(0); }
+.enter:focus-visible { outline: none; }
+@media (hover: none) {
+  .label { opacity: 1; transform: none; }
+  .enter { border-bottom-color: rgba(11,11,13,.5); }
+}
+
+.fine {
+  margin: 1.5rem 0 0;
+  font-size: .78rem;
+  letter-spacing: .01em;
+  color: rgba(11,11,13,.62);
+}
+.fine.dim { margin-top: 2.6rem; color: rgba(11,11,13,.4); }
+.linkish {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: .78rem;
+  color: var(--black); border-bottom: 1px solid currentColor; text-decoration: none;
+}
+.backlink {
+  display: inline-block; margin-top: 2.2rem;
+  font-size: .78rem; color: rgba(11,11,13,.5); text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.backlink:hover { color: var(--black); border-bottom-color: var(--black); }
+
+/* ---------- stage ---------- */
+
+.stage { position: fixed; inset: 0; z-index: 2; background: var(--field); }
+#view { display: block; width: 100%; height: 100%; }
+
+/* ---------- console ---------- */
+
+.console {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: min(20rem, 86vw);
+  padding: 2rem 1.6rem;
+  overflow-y: auto;
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border-left: 1px solid rgba(11,11,13,.08);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.console.receded { opacity: 0; transform: translateX(1.2rem); pointer-events: none; }
+
+.plate {
+  display: block; width: 100%; text-align: left;
+  background: none; border: 0; border-bottom: 1px solid rgba(11,11,13,.08);
+  padding: .9rem 0; cursor: pointer; color: var(--black); font-family: inherit;
+}
+.plate em {
+  font-style: normal; font-size: .66rem; letter-spacing: .16em;
+  color: rgba(11,11,13,.35); display: block;
+}
+.plate strong {
+  display: block; font-weight: 500; font-size: 1.05rem;
+  letter-spacing: -.02em; margin: .15rem 0 .2rem;
+}
+.plate span { font-size: .78rem; line-height: 1.4; color: rgba(11,11,13,.5); }
+.plate.is-on em, .plate.is-on strong { color: var(--black); }
+.plate:not(.is-on) strong { color: rgba(11,11,13,.45); }
+
+.console-foot {
+  margin-top: 2rem; padding-top: 1.2rem;
+  border-top: 1px solid rgba(11,11,13,.08);
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+}
+.mode { font-size: .72rem; color: rgba(11,11,13,.55); }
+.mode select {
+  font-family: inherit; font-size: .72rem; background: none; border: 0;
+  border-bottom: 1px solid rgba(11,11,13,.3); color: var(--black);
+  margin-left: .4rem; padding: .1rem;
+}
+
+/* ---------- signal plate ---------- */
+
+.specimen {
+  position: absolute; left: 0; top: 0; bottom: 0; width: min(18rem, 84vw);
+  padding: 1.6rem 1.3rem; overflow-y: auto;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-right: 1px solid rgba(11,11,13,.08);
+}
+.specimen-head {
+  font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(11,11,13,.4);
+  border-bottom: 1px solid rgba(11,11,13,.1);
+  padding-bottom: .6rem; margin-bottom: .9rem;
+}
+.specimen-head span {
+  display: block; letter-spacing: .02em; text-transform: none;
+  color: rgba(11,11,13,.55); margin-top: .3rem;
+}
+.specimen-row {
+  display: grid; grid-template-columns: 5.2rem 1fr 2.2rem;
+  align-items: center; gap: .5rem; margin-bottom: .38rem; font-size: .7rem;
+}
+.specimen-row i { font-style: normal; color: rgba(11,11,13,.6); }
+.specimen-row b { position: relative; display: block; height: 3px; background: rgba(11,11,13,.08); }
+.specimen-row s { position: absolute; top: 0; height: 3px; background: var(--black); text-decoration: none; }
+.specimen-row u { text-decoration: none; text-align: right; color: rgba(11,11,13,.4); }
+
+@media (max-width: 640px) {
+  .console {
+    width: 100%; top: auto; height: 46dvh;
+    border-left: 0; border-top: 1px solid rgba(11,11,13,.08);
+  }
+  .console.receded { transform: translateY(1.2rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01ms !important; }
+}
+
+/* The prismatic field stays alive behind the tool, dimmed so the visual leads. */
+.stage { background: transparent; }
+#view { opacity: .94; mix-blend-mode: normal; }
+.stage::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(11,11,13,.55);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ---------- style list ---------- */
+.stylelist { display: flex; flex-direction: column; margin-bottom: 1.6rem; }
+.styleitem {
+  text-align: left; background: none; border: 0;
+  border-bottom: 1px solid rgba(11,11,13,.07);
+  padding: .62rem 0; cursor: pointer; font-family: inherit; color: var(--black);
+}
+.styleitem strong {
+  font-weight: 500; font-size: 1.02rem; letter-spacing: -.02em;
+  color: rgba(11,11,13,.42); transition: color .3s ease;
+}
+.styleitem:hover strong { color: rgba(11,11,13,.7); }
+.styleitem.is-on strong { color: var(--black); }
+.styleitem.is-on { border-bottom-color: rgba(11,11,13,.4); }
+
+/* ---------- panel wayfinding ---------- */
+.panel-head {
+  font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(11,11,13,.4); margin: 1.6rem 0 .3rem;
+}
+.panel-head:first-child { margin-top: 0; }
+
+/* ---------- bars ---------- */
+.barlist { display: flex; flex-direction: column; }
+
+.barrow { margin-bottom: 1.3rem; }
+.barrow i {
+  display: block; font-style: normal; font-size: .8rem;
+  color: rgba(11,11,13,.7); margin-bottom: .5rem;
+}
+.barrow.is-reactive i { color: var(--black); font-weight: 500; }
+.barrow.is-reactive { margin-bottom: .8rem; }
+
+.barrow input[type=range] {
+  -webkit-appearance: none; appearance: none; background: none;
+  width: 100%; height: 1rem; display: block;
+}
+.barrow input[type=range]::-webkit-slider-runnable-track {
+  height: 1px; background: rgba(11,11,13,.22);
+}
+.barrow input[type=range]::-moz-range-track {
+  height: 1px; background: rgba(11,11,13,.22);
+}
+.barrow input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 11px; height: 11px; margin-top: -5.5px;
+  border-radius: 50%; background: var(--black);
+}
+.barrow input[type=range]::-moz-range-thumb {
+  width: 11px; height: 11px; border: 0; border-radius: 50%; background: var(--black);
+}
+
+/* The one explanation the panel gives: which movement drives what, for the
+   bar that just made every signal-driven value start listening to the body. */
+.signalmap {
+  list-style: none; margin: 0 0 1.6rem; padding: .7rem .8rem;
+  background: rgba(11,11,13,.035); border-radius: 4px;
+  display: flex; flex-direction: column; gap: .35rem;
+  font-size: .72rem; line-height: 1.4; color: rgba(11,11,13,.55);
+}
+.signalmap b { color: rgba(11,11,13,.85); font-weight: 500; }
+.signalmap .arrow { color: rgba(11,11,13,.4); }
