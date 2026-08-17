@@ -8,6 +8,12 @@ const COUNT = 260;
 let stars = null;
 let built = 0;
 
+// The lit-decay rates below are tuned as per-frame factors at ~60fps;
+// rescale by dt so stars don't flicker faster or slower as the frame
+// interval wobbles.
+const REF_DT = 1000 / 60;
+const timeK = (k, dt) => 1 - Math.pow(1 - k, dt / REF_DT);
+
 function build() {
   let s = 20260816 >>> 0;
   const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
@@ -52,7 +58,7 @@ export default {
   reset() { stars = null; },
 
   draw(ctx, sig, s, frame) {
-    const { w, h, t } = frame;
+    const { w, h, t, dt } = frame;
     if (!stars || built !== COUNT) build();
 
     ctx.globalCompositeOperation = 'source-over';
@@ -80,6 +86,9 @@ export default {
     const litList = [];
     ctx.globalCompositeOperation = 'lighter';
 
+    const kLitUp = timeK(0.16, dt);
+    const kLitDown = timeK(0.045, dt);
+
     for (const st of stars) {
       const [x, y] = place(st);
       let target = 0;
@@ -87,7 +96,7 @@ export default {
         const d = Math.hypot(x - fx, y - fy);
         if (d < fr) target = Math.max(target, (1 - d / fr) * fv);
       }
-      st.lit += (target - st.lit) * (target > st.lit ? 0.16 : 0.045);
+      st.lit += (target - st.lit) * (target > st.lit ? kLitUp : kLitDown);
 
       const tw = 1 + Math.sin(t * 0.004 * (0.4 + s.twinkle) + st.tw) * 0.3 * s.twinkle;
       const alpha = (0.09 + st.lit * 0.9) * st.mag * tw;

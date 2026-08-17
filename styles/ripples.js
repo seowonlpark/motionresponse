@@ -9,12 +9,12 @@ const pool = Array.from({ length: POOL }, () => ({ live: false }));
 let cursor = 0;
 let lastEmit = 0;
 
-function spawn(x, y, dx, dy, hue, born) {
+function spawn(x, y, dx, dy, hue, born, maxR, life) {
   const r = pool[cursor];
   cursor = (cursor + 1) % POOL;
   r.live = true;
   r.x = x; r.y = y; r.dx = dx; r.dy = dy;
-  r.hue = hue; r.born = born;
+  r.hue = hue; r.born = born; r.maxR = maxR; r.life = life;
 }
 
 export default {
@@ -30,7 +30,7 @@ export default {
   schema: [
     { key: 'period',     label: 'interval',      min: 40,  max: 500,  step: 5,    signal: 'handSpeed' },
     { key: 'drift',      label: 'drift',         min: 0,   max: 1.6,  step: 0.02, signal: 'handSpeed' },
-    { key: 'wavelength', label: 'ring size',     min: 0.1, max: 1,    step: 0.02, signal: 'handReach' },
+    { key: 'wavelength', label: 'ring size',     min: 0.1, max: 1,    step: 0.02, signal: 'handDistance' },
     { key: 'life',       label: 'duration',      min: 900, max: 7000, step: 100 },
     { key: 'hue',        label: 'colour',        min: 170, max: 250,  step: 1,    signal: 'elbowAngle' },
     { key: 'spread',     label: 'colour range',  min: 0,   max: 120,  step: 1 },
@@ -50,6 +50,8 @@ export default {
   draw(ctx, sig, s, frame) {
     const { w, h, t } = frame;
 
+    const spawnMaxR = Math.hypot(w, h) * 0.5 * s.wavelength * 2.2;
+
     if (t - lastEmit > s.period) {
       lastEmit = t;
       sig.limbs.forEach((L, i) => {
@@ -58,8 +60,8 @@ export default {
         const a = L.sweep;
         const dx = Math.cos(a) * s.drift * 0.00006;
         const dy = Math.sin(a) * s.drift * 0.00006;
-        spawn(L.tip.x, L.tip.y, dx, dy, hue, t);
-        if (L.hinge.v > 0.4) spawn(L.hinge.x, L.hinge.y, dx * 0.6, dy * 0.6, (hue + 14) % 360, t);
+        spawn(L.tip.x, L.tip.y, dx, dy, hue, t, spawnMaxR, s.life);
+        if (L.hinge.v > 0.4) spawn(L.hinge.x, L.hinge.y, dx * 0.6, dy * 0.6, (hue + 14) % 360, t, spawnMaxR, s.life);
       });
     }
 
@@ -70,15 +72,13 @@ export default {
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
 
-    const maxR = Math.hypot(w, h) * 0.5 * s.wavelength * 2.2;
-
     for (const r of pool) {
       if (!r.live) continue;
       const age = t - r.born;
-      if (age > s.life) { r.live = false; continue; }
+      if (age > r.life) { r.live = false; continue; }
 
-      const p = age / s.life;
-      const rad = p * maxR;
+      const p = age / r.life;
+      const rad = p * r.maxR;
       const fade = Math.sin(p * Math.PI) * (1 - p * 0.4);
       const x = (r.x + r.dx * age) * w;
       const y = (r.y + r.dy * age) * h;

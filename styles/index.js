@@ -12,11 +12,10 @@
 
 import mirror from './mirror.js';
 import ripples from './ripples.js';
-import bloom from './bloom.js';
 import constellation from './constellation.js';
 import skeleton from './skeleton.js';
 
-export const styles = [mirror, ripples, bloom, constellation];
+export const styles = [mirror, ripples, constellation];
 
 // Diagnostic view. Reachable with ?style=skeleton but not offered in the UI.
 export const allStyles = [...styles, skeleton];

@@ -30,7 +30,6 @@ let modeResolved = false;
 // "elbow angle" always means an elbow and "hand distance" always means hands.
 export const signals = {
   // frame
-  tilt: 0,          // -1..1  shoulder line vs horizontal, diagnostic only
   handSpeed: 0,      //  0..1  mean hand speed, in shoulder widths per second
   handDistance: 0,   //  0..1  hands together (1) vs apart (0)
   handReach: 0,      //  0..1  mean hand distance from the body centre
@@ -103,10 +102,6 @@ export function computeSignals(now, dt) {
     if (now - calibStart > config.calibrationMs && calibMax > 0.05) calibrated = true;
   }
   signals.scale = shoulderWidth;
-
-  // tilt: shoulder line angle, normalized so a quarter turn reads as full.
-  // Diagnostic only — kept for the skeleton view, no style is driven by it.
-  signals.tilt = clamp(shoulderAngle / (Math.PI / 4), -1, 1);
 
   // Limbs. Upper body is 2, full body is 4. Renderers iterate and never ask.
   const set = LIMB_SETS[config.resolvedMode] || LIMB_SETS.upper;

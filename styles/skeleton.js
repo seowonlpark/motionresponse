@@ -42,8 +42,8 @@ export default {
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
     const r = sig.scale * w;
-    ctx.moveTo(ox - r, oy - sig.tilt * (Math.PI / 4) * r);
-    ctx.lineTo(ox + r, oy + sig.tilt * (Math.PI / 4) * r);
+    ctx.moveTo(ox - r, oy);
+    ctx.lineTo(ox + r, oy);
     ctx.stroke();
     ctx.setLineDash([]);
 
@@ -62,8 +62,7 @@ export default {
 
       // sweep drawn as a ray from origin, so the signal is visible as geometry
       if (s.sweepRays) {
-        const base = Math.atan2(sig.tilt * (Math.PI / 4), 1);
-        const a = L.sweep + base;
+        const a = L.sweep;
         ctx.strokeStyle = s.rose;
         ctx.lineWidth = 1;
         ctx.globalAlpha = alpha * 0.5;

@@ -23,7 +23,7 @@ let active = byId(params.get('style'));
 let usePhantom = false;
 const phantom = createPhantom({ limbs: 2 });
 
-let frame = { w: 0, h: 0, t: 0 };
+let frame = { w: 0, h: 0, t: 0, dt: 16.6667 };
 let last = performance.now();
 let fps = 60;
 
@@ -46,12 +46,13 @@ function loop(now) {
   last = now;
   fps += (1000 / Math.max(1, dt) - fps) * 0.08;
   frame.t = now;
+  frame.dt = dt;
 
   let sig;
   if (usePhantom) {
     sig = phantom(now);
   } else {
-    easeState();
+    easeState(dt);
     resolveMode(now);
     sig = computeSignals(now, dt);
   }

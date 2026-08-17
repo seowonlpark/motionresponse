@@ -19,6 +19,11 @@ let wedgeHeld = 8;
 const TRACK_EASE = 0.15;
 let tracked = [];
 
+// TRACK_EASE is tuned as a per-frame factor at ~60fps; rescale by dt so the
+// facets don't speed up or stutter when the frame interval isn't steady.
+const REF_DT = 1000 / 60;
+const timeK = (k, dt) => 1 - Math.pow(1 - k, dt / REF_DT);
+
 function angleLerp(a, b, k) {
   let d = b - a;
   while (d > Math.PI) d -= TAU;
@@ -70,7 +75,7 @@ export default {
   reset() { wedgeHeld = 8; tracked = []; },
 
   draw(ctx, sig, s, frame) {
-    const { w, h, t } = frame;
+    const { w, h, t, dt } = frame;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const R = Math.hypot(w, h) * 0.6;
     const SRC = Math.min(MAX_SRC, Math.max(MIN_SRC, Math.round(R * 1.5 * dpr)));
@@ -95,10 +100,11 @@ export default {
       let tr = tracked[i];
       if (!tr) tr = tracked[i] = { a: L.sweep, r: rawR, fold: L.fold, vis: L.tip.v };
       else {
-        tr.a = angleLerp(tr.a, L.sweep, TRACK_EASE);
-        tr.r = tr.r + (rawR - tr.r) * TRACK_EASE;
-        tr.fold = tr.fold + (L.fold - tr.fold) * TRACK_EASE;
-        tr.vis = tr.vis + (L.tip.v - tr.vis) * TRACK_EASE;
+        const k = timeK(TRACK_EASE, dt);
+        tr.a = angleLerp(tr.a, L.sweep, k);
+        tr.r = tr.r + (rawR - tr.r) * k;
+        tr.fold = tr.fold + (L.fold - tr.fold) * k;
+        tr.vis = tr.vis + (L.tip.v - tr.vis) * k;
       }
 
       const hue = (s.hue + (i / sig.limbs.length) * s.spread) % 360;

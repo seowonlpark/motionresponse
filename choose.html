@@ -42,7 +42,7 @@
     grid.appendChild(a);
 
     const canvas = a.querySelector('canvas');
-    // Each preview gets its own dancer, offset in time so the four panels
+    // Each preview gets its own dancer, offset in time so the panels
     // are never in lockstep.
     panels.push({
       style,
@@ -76,7 +76,6 @@
       const t = now + p.offset;
       const sig = p.tick(t);
       p.frame.t = t;
-      p.style.reset?.();
       p.style.draw(p.ctx, sig, resolve(p.style, sig), p.frame);
     }
     if (!reduced) requestAnimationFrame(loop);

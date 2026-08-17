@@ -4,7 +4,7 @@ Physical motion translated to visual effects.
 
 A kaleidoscope driven by your own body. Pose tracking reads how far you reach,
 how sharply you fold, and which way you sweep, and turns that into colour, shape
-and spin in real time. Four visuals, each reshapeable from inside.
+and spin in real time. Three visuals, each reshapeable from inside.
 
 Static files. No build step, no dependencies to install, no server code. Nothing
 leaves the machine and nothing is recorded.
@@ -35,9 +35,9 @@ Safari 16.4+, or Firefox.
 | File | What it is |
 |---|---|
 | `index.html` | Landing. The shifting prismatic field, the title, one arrow. |
-| `choose.html` | Full-screen chooser. All four visuals running live, before any camera. |
+| `choose.html` | Full-screen chooser. All three visuals running live, before any camera. |
 | `tool.html` | The instrument. Camera gate, then the canvas and the side panel. |
-| `?style=` | Any screen can deep-link a visual, e.g. `tool.html?style=bloom`. |
+| `?style=` | Any screen can deep-link a visual, e.g. `tool.html?style=ripples`. |
 
 ---
 
@@ -60,8 +60,8 @@ returns. The `requestAnimationFrame` loop reads it. Pose runs at a different and
 irregular rate from the display, so coupling them makes movement stutter in a way
 that looks like a rendering problem but is not.
 
-**Renderers never touch a landmark.** They read signals. This is what keeps four
-visuals from becoming four copies of the pose code, and it is what makes the
+**Renderers never touch a landmark.** They read signals. This is what keeps the
+visuals from becoming copies of the pose code, and it is what makes the
 upper-body and full-body modes the same code path.
 
 ---
@@ -173,11 +173,6 @@ hysteresis so it does not flicker on a boundary value.
 `sweep` sets a drift vector, so rings advect across the surface instead of sitting
 concentric. Drift is what reads as direction.
 
-**bloom** Seeded recursive branches with flowers at the ends. Branches are never
-added or removed; a `growth` scalar gates how far along each is drawn, so they
-extend and retract visibly. Geometry is cached and rebuilt only when quantised
-depth or fork angle changes.
-
 **constellation** A fixed, seeded sky, always fully present and mostly dim.
 Attention fields at tips and hinges brighten what falls inside them, and lit stars
 link to nearest lit neighbours with a capped degree so the graph stays legible.
@@ -194,7 +189,7 @@ line and the sweep rays visible.
 `phantom.js` is a synthetic dancer that emits exactly the shape `signals.js`
 emits, so any renderer can be driven by it without knowing the difference.
 
-It does two jobs. It animates the four chooser previews before a camera is ever
+It does two jobs. It animates the three chooser previews before a camera is ever
 requested, and it takes over when a camera is refused or unavailable. A dead
 canvas is a worse failure than a moving one, and this removes the need for a
 recorded fallback video.
@@ -296,7 +291,6 @@ kaleidoscope/
     index.js         registry
     mirror.js
     ripples.js
-    bloom.js
     constellation.js
     skeleton.js      diagnostic
 ```
@@ -319,8 +313,7 @@ they share a DOM.
 
 The visual constants are a first pass and are meant to be argued with. Start with
 `chroma`, `shards`, `wedges` and `speed` on the backdrop, and the `defaults` block
-at the top of each style. If bloom's branches snap rather than grow, the
-quantisation on its geometry cache key is too coarse.
+at the top of each style.
 
 `docs/build-plan.md` is the original planning document. Its phases and signal
 tables still hold; its aesthetic direction and its single global `settings.js`

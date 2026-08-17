@@ -21,6 +21,15 @@ function smoothstep(lo, hi, x) {
   return t * t * (3 - 2 * t);
 }
 
+// easeAttack/easeRelease are tuned as per-frame blend factors at ~60fps.
+// rAF doesn't hold to that steadily (pose inference shares the main thread),
+// so a fixed factor covers more or less distance per frame as the interval
+// swings — that swing is what reads as jerkiness. Rescaling by dt makes the
+// blend cover the same distance per unit of wall-clock time regardless of
+// how the frame interval wobbles.
+const REF_DT = 1000 / 60;
+const timeK = (k, dt) => 1 - Math.pow(1 - k, dt / REF_DT);
+
 let hasPose = false;
 export const isTracking = () => hasPose;
 
@@ -48,7 +57,7 @@ export function setTargets(marks, now) {
 }
 
 // Called once per rendered frame from the rAF loop.
-export function easeState() {
+export function easeState(dt) {
   for (let i = 0; i < N; i++) {
     const t = targets[i];
     const e = eased[i];
@@ -60,12 +69,12 @@ export function easeState() {
     // blended smoothly across a small speed band so the rate itself doesn't
     // pop and cause a visible jerk right at the crossover.
     const blend = smoothstep(SWITCH_LO, SWITCH_HI, speed);
-    const k = config.easeRelease + (config.easeAttack - config.easeRelease) * blend;
+    const k = timeK(config.easeRelease + (config.easeAttack - config.easeRelease) * blend, dt);
 
     e.px = e.x;
     e.py = e.y;
     e.x += dx * k;
     e.y += dy * k;
-    e.v += (t.v - e.v) * 0.2;
+    e.v += (t.v - e.v) * timeK(0.2, dt);
   }
 }
