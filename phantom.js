@@ -27,7 +27,7 @@ export function createPhantom(options = {}) {
   const phase = defs.map(() => rand() * TAU);
 
   const signals = {
-    tilt: 0, handSpeed: 0, handDistance: 0, handReach: 0, elbowAngle: 0,
+    handSpeed: 0, handDistance: 0, handReach: 0, elbowAngle: 0,
     origin: { x: 0.5, y: 0.5 },
     scale: 0.19,
     ready: true,
@@ -44,10 +44,8 @@ export function createPhantom(options = {}) {
     const t = (now / 1000) * cfg.tempo;
     const A = cfg.amplitude;
 
-    signals.tilt = Math.sin(t * 0.23) * 0.55 * A;
-
     const sw = signals.scale;
-    const shoulderAngle = signals.tilt * (Math.PI / 4);
+    const shoulderAngle = Math.sin(t * 0.23) * 0.55 * A * (Math.PI / 4);
     const ox = 0.5 + Math.sin(t * 0.11) * 0.03;
     const oy = 0.46 + Math.sin(t * 0.14) * 0.02;
     signals.origin.x = ox;
