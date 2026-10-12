@@ -102,3 +102,36 @@ html, body {
   .grid { grid-template-columns: 1fr; }
   .panel { aspect-ratio: 3 / 2; }
 }
+
+/* ---------- camera check popup ---------- */
+.camcheck {
+  border: 0; padding: 0; background: transparent; color: #fff;
+  width: min(26rem, calc(100vw - 2rem)); max-width: none;
+}
+.camcheck::backdrop { background: rgba(11,11,13,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.camcheck-card {
+  position: relative; margin: 0;
+  padding: 2rem 1.8rem 1.6rem;
+  background: #131316; border: 1px solid rgba(255,255,255,.14); border-radius: 6px;
+}
+.camcheck h2 { margin: 0 0 .9rem; font-weight: 500; font-size: 1.5rem; letter-spacing: -.03em; }
+.camcheck p { margin: 0; font-size: .92rem; line-height: 1.55; color: rgba(255,255,255,.7); }
+.camcheck-close {
+  position: absolute; top: 1rem; right: 1.2rem;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: .78rem; color: rgba(255,255,255,.5);
+}
+.camcheck-close:hover { color: #fff; }
+.camcheck-primary {
+  margin: 1.6rem 0 0; display: block; width: 100%;
+  background: #fff; color: #0B0B0D; border: 0; border-radius: 3px;
+  padding: .8rem 1rem; font: inherit; font-size: .95rem; font-weight: 500; cursor: pointer;
+}
+.camcheck-primary:hover { background: rgba(255,255,255,.88); }
+.camcheck-link {
+  display: block; margin-top: 1rem; background: none; border: 0; padding: 0;
+  font: inherit; font-size: .78rem; color: #fff; cursor: pointer;
+  border-bottom: 1px solid currentColor;
+}
+.camcheck-fine { margin-top: 1rem !important; font-size: .78rem !important; color: rgba(255,255,255,.5) !important; }
+.camcheck-fine.dim { color: rgba(255,255,255,.35) !important; }

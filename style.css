@@ -69,24 +69,11 @@ h1 {
   text-decoration: none;
   transition: border-color .5s cubic-bezier(.22,1,.36,1);
 }
-.glyph {
-  display: block; width: 2.75rem; flex: 0 0 auto; color: var(--black);
-  transition: transform .5s cubic-bezier(.22,1,.36,1);
-}
-.glyph svg { display: block; width: 100%; }
 .label {
   font-size: .95rem; letter-spacing: .01em; white-space: nowrap; color: var(--black);
-  opacity: 0; transform: translateX(-.7rem);
-  transition: opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);
 }
 .enter:hover, .enter:focus-visible { border-bottom-color: var(--black); }
-.enter:hover .glyph, .enter:focus-visible .glyph { transform: translateX(.55rem); }
-.enter:hover .label, .enter:focus-visible .label { opacity: 1; transform: translateX(0); }
 .enter:focus-visible { outline: none; }
-@media (hover: none) {
-  .label { opacity: 1; transform: none; }
-  .enter { border-bottom-color: rgba(11,11,13,.5); }
-}
 
 .fine {
   margin: 1.5rem 0 0;
@@ -116,87 +103,75 @@ h1 {
 
 .console {
   position: absolute; right: 0; top: 0; bottom: 0;
-  width: min(20rem, 86vw);
-  padding: 2rem 1.6rem;
+  width: min(26rem, 90vw);
+  padding: 2.2rem 2rem;
   overflow-y: auto;
-  background: rgba(255,255,255,.72);
+  background: rgba(11,11,13,.72);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
-  border-left: 1px solid rgba(11,11,13,.08);
+  border-left: 1px solid rgba(255,255,255,.08);
   transition: opacity .8s ease, transform .8s ease;
 }
 .console.receded { opacity: 0; transform: translateX(1.2rem); pointer-events: none; }
 
 .plate {
   display: block; width: 100%; text-align: left;
-  background: none; border: 0; border-bottom: 1px solid rgba(11,11,13,.08);
-  padding: .9rem 0; cursor: pointer; color: var(--black); font-family: inherit;
+  background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: .9rem 0; cursor: pointer; color: #fff; font-family: inherit;
 }
 .plate em {
-  font-style: normal; font-size: .66rem; letter-spacing: .16em;
-  color: rgba(11,11,13,.35); display: block;
+  font-style: normal; font-size: .75rem; letter-spacing: .14em;
+  color: rgba(255,255,255,.6); display: block;
 }
 .plate strong {
-  display: block; font-weight: 500; font-size: 1.05rem;
+  display: block; font-weight: 500; font-size: 1.2rem;
   letter-spacing: -.02em; margin: .15rem 0 .2rem;
 }
-.plate span { font-size: .78rem; line-height: 1.4; color: rgba(11,11,13,.5); }
-.plate.is-on em, .plate.is-on strong { color: var(--black); }
-.plate:not(.is-on) strong { color: rgba(11,11,13,.45); }
-
-.console-foot {
-  margin-top: 2rem; padding-top: 1.2rem;
-  border-top: 1px solid rgba(11,11,13,.08);
-  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-}
-.mode { font-size: .72rem; color: rgba(11,11,13,.55); }
-.mode select {
-  font-family: inherit; font-size: .72rem; background: none; border: 0;
-  border-bottom: 1px solid rgba(11,11,13,.3); color: var(--black);
-  margin-left: .4rem; padding: .1rem;
-}
+.plate span { font-size: .9rem; line-height: 1.5; color: rgba(255,255,255,.72); }
+.plate.is-on em, .plate.is-on strong { color: #fff; }
+.plate:not(.is-on) strong { color: rgba(255,255,255,.45); }
 
 /* ---------- signal plate ---------- */
 
 .specimen {
-  position: absolute; left: 0; top: 0; bottom: 0; width: min(18rem, 84vw);
+  position: absolute; left: 0; top: 0; bottom: 0; width: min(22rem, 88vw);
   padding: 1.6rem 1.3rem; overflow-y: auto;
-  background: rgba(255,255,255,.78);
+  background: rgba(11,11,13,.78);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-right: 1px solid rgba(11,11,13,.08);
+  border-right: 1px solid rgba(255,255,255,.08);
 }
 .specimen-head {
-  font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(11,11,13,.4);
-  border-bottom: 1px solid rgba(11,11,13,.1);
+  font-size: .75rem; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+  border-bottom: 1px solid rgba(255,255,255,.1);
   padding-bottom: .6rem; margin-bottom: .9rem;
 }
 .specimen-head span {
   display: block; letter-spacing: .02em; text-transform: none;
-  color: rgba(11,11,13,.55); margin-top: .3rem;
+  color: rgba(255,255,255,.8); margin-top: .3rem; font-size: .85rem;
 }
 .specimen-skeleton {
   display: block; width: 100%; aspect-ratio: 1;
-  margin: 0 0 .4rem; background: rgba(11,11,13,.035); border-radius: 4px;
+  margin: 0 0 .4rem; background: rgba(255,255,255,.035); border-radius: 4px;
 }
 .specimen-caption {
-  font-size: .62rem; letter-spacing: .03em;
-  color: rgba(11,11,13,.35); margin: 0 0 1rem;
+  font-size: .75rem; letter-spacing: .02em;
+  color: rgba(255,255,255,.6); margin: 0 0 1rem;
 }
 .specimen-row {
   display: grid; grid-template-columns: 5.2rem 1fr 2.2rem;
-  align-items: center; gap: .5rem; margin-bottom: .38rem; font-size: .7rem;
+  align-items: center; gap: .5rem; margin-bottom: .5rem; font-size: .82rem;
 }
-.specimen-row i { font-style: normal; color: rgba(11,11,13,.6); }
-.specimen-row b { position: relative; display: block; height: 3px; background: rgba(11,11,13,.08); }
-.specimen-row s { position: absolute; top: 0; height: 3px; background: var(--black); text-decoration: none; }
-.specimen-row u { text-decoration: none; text-align: right; color: rgba(11,11,13,.4); }
+.specimen-row i { font-style: normal; color: rgba(255,255,255,.85); }
+.specimen-row b { position: relative; display: block; height: 3px; background: rgba(255,255,255,.08); }
+.specimen-row s { position: absolute; top: 0; height: 3px; background: #fff; text-decoration: none; }
+.specimen-row u { text-decoration: none; text-align: right; color: rgba(255,255,255,.65); }
 
 @media (max-width: 640px) {
   .console {
     width: 100%; top: auto; height: 46dvh;
-    border-left: 0; border-top: 1px solid rgba(11,11,13,.08);
+    border-left: 0; border-top: 1px solid rgba(255,255,255,.08);
   }
   .console.receded { transform: translateY(1.2rem); }
 }
@@ -217,64 +192,121 @@ h1 {
 }
 
 /* ---------- style list ---------- */
-.stylelist { display: flex; flex-direction: column; margin-bottom: 1.6rem; }
+.panel-caption { margin: .2rem 0 1.6rem; font-size: .92rem; line-height: 1.5; color: rgba(255,255,255,.75); }
+.stylelist { display: flex; flex-direction: column; margin-bottom: .9rem; }
 .styleitem {
   text-align: left; background: none; border: 0;
-  border-bottom: 1px solid rgba(11,11,13,.07);
-  padding: .62rem 0; cursor: pointer; font-family: inherit; color: var(--black);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: .62rem 0; cursor: pointer; font-family: inherit; color: #fff;
 }
 .styleitem strong {
-  font-weight: 500; font-size: 1.02rem; letter-spacing: -.02em;
-  color: rgba(11,11,13,.42); transition: color .3s ease;
+  font-weight: 500; font-size: 1.3rem; letter-spacing: -.02em;
+  color: rgba(255,255,255,.62); transition: color .3s ease;
 }
-.styleitem:hover strong { color: rgba(11,11,13,.7); }
-.styleitem.is-on strong { color: var(--black); }
-.styleitem.is-on { border-bottom-color: rgba(11,11,13,.4); }
+.styleitem:hover strong { color: rgba(255,255,255,.9); }
+.styleitem.is-on strong { color: #fff; }
+.styleitem.is-on { border-bottom-color: rgba(255,255,255,.4); }
 
 /* ---------- panel wayfinding ---------- */
 .panel-head {
-  font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(11,11,13,.4); margin: 1.6rem 0 .3rem;
+  font-size: .75rem; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,255,255,.65); margin: 1.8rem 0 .5rem;
 }
 .panel-head:first-child { margin-top: 0; }
+.panel-hint { margin: 0 0 .9rem; font-size: .88rem; line-height: 1.5; color: rgba(255,255,255,.7); }
+.barsection { padding-top: .2rem; }
+.barsection + .barsection {
+  margin-top: 1.4rem; padding-top: 1.1rem;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.barsection .panel-head { margin-top: 0; color: rgba(255,255,255,.7); }
 
 /* ---------- bars ---------- */
 .barlist { display: flex; flex-direction: column; }
 
-.barrow { margin-bottom: 1.3rem; }
+.barrow { margin-bottom: 1.1rem; }
 .barrow i {
-  display: block; font-style: normal; font-size: .8rem;
-  color: rgba(11,11,13,.7); margin-bottom: .5rem;
+  display: block; font-style: normal; font-size: 1.05rem; font-weight: 500;
+  color: rgba(255,255,255,.9); margin-bottom: .6rem;
 }
-.barrow.is-reactive i { color: var(--black); font-weight: 500; }
-.barrow.is-reactive { margin-bottom: .8rem; }
+.barrow.is-reactive i { color: #fff; font-weight: 500; }
 
 .barrow input[type=range] {
   -webkit-appearance: none; appearance: none; background: none;
-  width: 100%; height: 1rem; display: block;
+  width: 100%; height: 2rem; display: block; margin: 0; cursor: pointer;
+  --v: 0; /* 0–1; fill ends under the thumb's centre, not the track's raw % */
+  --edge: calc(1rem + (100% - 2rem) * var(--v));
+  outline: none; touch-action: pan-y;
 }
 .barrow input[type=range]::-webkit-slider-runnable-track {
-  height: 1px; background: rgba(11,11,13,.22);
+  height: 2rem; border-radius: 1rem;
+  background: linear-gradient(to right, #fff var(--edge), rgba(255,255,255,.14) var(--edge));
+  transition: background-color .2s ease;
 }
 .barrow input[type=range]::-moz-range-track {
-  height: 1px; background: rgba(11,11,13,.22);
+  height: 2rem; border-radius: 1rem; background: rgba(255,255,255,.14);
+}
+.barrow input[type=range]::-moz-range-progress {
+  height: 2rem; border-radius: 1rem; background: #fff;
 }
 .barrow input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 11px; height: 11px; margin-top: -5.5px;
-  border-radius: 50%; background: var(--black);
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: #fff; border: 0; box-shadow: 0 1px 6px rgba(0,0,0,.35);
+  transition: transform .15s ease;
 }
 .barrow input[type=range]::-moz-range-thumb {
-  width: 11px; height: 11px; border: 0; border-radius: 50%; background: var(--black);
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: #fff; border: 0; box-shadow: 0 1px 6px rgba(0,0,0,.35);
+  transition: transform .15s ease;
 }
+.barrow input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.06); }
+.barrow input[type=range]:active::-webkit-slider-thumb { transform: scale(.94); }
+.barrow input[type=range]:hover::-moz-range-thumb { transform: scale(1.06); }
+.barrow input[type=range]:active::-moz-range-thumb { transform: scale(.94); }
+.barrow input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #fff; }
+.barrow input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px #fff; }
 
 /* The one explanation the panel gives: which movement drives what, for the
    bar that just made every signal-driven value start listening to the body. */
 .signalmap {
   list-style: none; margin: 0 0 1.6rem; padding: .7rem .8rem;
-  background: rgba(11,11,13,.035); border-radius: 4px;
+  background: rgba(255,255,255,.035); border-radius: 4px;
   display: flex; flex-direction: column; gap: .35rem;
-  font-size: .72rem; line-height: 1.4; color: rgba(11,11,13,.55);
+  font-size: .85rem; line-height: 1.5; color: rgba(255,255,255,.75);
 }
-.signalmap b { color: rgba(11,11,13,.85); font-weight: 500; }
-.signalmap .arrow { color: rgba(11,11,13,.4); }
+.signalmap b { color: #fff; font-weight: 600; }
+.signalmap .arrow { color: rgba(255,255,255,.6); }
+
+/* ---------- tool polish ---------- */
+.console, .specimen { color: #fff; }
+.console { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
+.styleitem, .plate { transition: border-color .3s ease; }
+.styleitem:hover { border-bottom-color: rgba(255,255,255,.25); }
+.specimen-skeleton { background: rgba(255,255,255,.05); }
+
+/* ---------- signal plate toggle ---------- */
+.plate-toggle {
+  position: absolute; left: 1.2rem; bottom: 1.2rem; z-index: 3;
+  display: inline-flex; align-items: center; gap: .6rem;
+  padding: .6rem 1rem .6rem .65rem;
+  background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,.35);
+  border: 0; border-radius: 999px;
+  color: #0B0B0D; font: inherit; font-size: .95rem; font-weight: 500; letter-spacing: .01em; cursor: pointer;
+  transition: border-color .3s ease, background .3s ease;
+}
+.plate-toggle:hover { background: rgba(255,255,255,.88); }
+.plate-toggle kbd {
+  display: grid; place-items: center; width: 1.45rem; height: 1.45rem;
+  border-radius: 5px; background: #0B0B0D; color: #fff;
+  font: inherit; font-size: .75rem; font-weight: 600;
+}
+.plate-toggle.is-on { background: rgba(11,11,13,.8); color: #fff; box-shadow: none; border: 1px solid rgba(255,255,255,.25); }
+.plate-toggle.is-on kbd { background: #fff; color: #0B0B0D; }
+.specimen { padding-bottom: 4.6rem; }
+@media (max-width: 640px) {
+  .plate-toggle { bottom: calc(46dvh + .8rem); }
+}
+
+.console .linkish { font-size: .9rem; }
+.console { font-weight: 450; }

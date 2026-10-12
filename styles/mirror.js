@@ -9,6 +9,10 @@ const MAX_SRC = 1024;
 let src = null, sctx = null;
 let srcSize = 0;
 let wedgeHeld = 8;
+// When the segment count steps, the old layout fades out under the new one
+// instead of popping. fade runs 0 -> 1 over FADE_MS.
+const FADE_MS = 350;
+let prevWedges = 8, fade = 1;
 
 // Facet position/size track the raw arm angle and reach, which is what made
 // this style feel jittery even with the reactive bar at zero — sweep and
@@ -16,8 +20,12 @@ let wedgeHeld = 8;
 // angle change swings a long way once multiplied out to the wedge radius.
 // A second, slower ease on top of state.js's landmark easing calms that down
 // without touching how "reactive" (the modulation depth) works.
-const TRACK_EASE = 0.15;
+const TRACK_EASE = 0.05;
 let tracked = [];
+
+// Rotation is integrated frame by frame. Computing it as t * spin makes the
+// whole pattern jump whenever spin changes, because t is the full elapsed time.
+let spinAngle = 0, spinNow = 0, facetAngle = 0;
 
 // TRACK_EASE is tuned as a per-frame factor at ~60fps; rescale by dt so the
 // facets don't speed up or stutter when the frame interval isn't steady.
@@ -43,36 +51,55 @@ function offscreen(size) {
   return sctx;
 }
 
+// Mirror the wedge source N times around the centre at the given opacity.
+function blit(ctx, N, R, alpha) {
+  const step = TAU / N;
+  ctx.globalAlpha = alpha;
+  for (let i = 0; i < N; i++) {
+    ctx.save();
+    ctx.rotate(i * step);
+    if (i % 2) ctx.scale(1, -1);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, R, -step / 2, step / 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(src, -R * 0.5, -R * 0.5, R * 1.5, R * 1.5);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
 export default {
   id: 'mirror',
   label: 'mirror',
   caption: 'the classic kaleidoscope. facets fold around a turning centre.',
 
   defaults: {
-    wedges: 8, spin: 0.35, hue: 210, spread: 90,
+    wedges: 8, spin: 0.6, hue: 210, spread: 90,
     facet: 0.55, glow: 0.5, bg: 0.06,
   },
 
   schema: [
-    { key: 'wedges', label: 'segments',    min: 4,  max: 18,  step: 2,    signal: 'handDistance' },
-    { key: 'spin',   label: 'spin speed',  min: -2, max: 2,   step: 0.05, signal: 'handSpeed' },
-    { key: 'hue',    label: 'colour',      min: 0,  max: 360, step: 1,    signal: 'elbowAngle' },
+    { key: 'wedges', label: 'segments',    min: 4,  max: 18,  step: 2,    signal: 'handDistance', depth: 0.3 },
+    { key: 'spin',   label: 'spin speed',  min: 0, max: 2,   step: 0.05, signal: 'handSpeed', depth: 0.25 },
+    { key: 'hue',    label: 'colour',      min: 0,  max: 360, step: 1,    signal: 'elbowAngle', depth: 0.2 },
     { key: 'spread', label: 'colour range', min: 10, max: 200, step: 1 },
-    { key: 'facet',  label: 'facet size',  min: 0,  max: 1,   step: 0.02, signal: 'handReach' },
-    { key: 'glow',   label: 'glow',        min: 0,  max: 1,   step: 0.02, signal: 'handSpeed' },
+    { key: 'facet',  label: 'facet size',  min: 0,  max: 1,   step: 0.02, signal: 'handReach', depth: 0.3 },
+    { key: 'glow',   label: 'glow',        min: 0,  max: 1,   step: 0.02, signal: 'handSpeed', depth: 0.3 },
     { key: 'bg',     label: 'trail',       min: 0,  max: 0.4, step: 0.01 },
   ],
 
   // The whole panel, reduced to four switches. Each bundles a couple of
   // schema values behind one plain description instead of exposing them raw.
   bars: [
-    { id: 'reactive', kind: 'reactive', label: 'reacts to your movement' },
-    { id: 'segments', label: 'more segments', on: { wedges: 14 } },
-    { id: 'bold',     label: 'bolder colour', on: { glow: 0.85, spread: 150 } },
-    { id: 'spin',     label: 'faster spin',   on: { spin: 1.1 } },
+    { id: 'reactive', kind: 'reactive', label: 'react' },
+    { id: 'segments', label: 'segments', on: { wedges: 14 } },
+    { id: 'bold',     label: 'colour', on: { glow: 0.85, spread: 150 } },
+    { id: 'spin',     label: 'spin',   on: { spin: 1.1 } },
   ],
 
-  reset() { wedgeHeld = 8; tracked = []; },
+  reset() { wedgeHeld = 8; prevWedges = 8; fade = 1; tracked = []; spinAngle = 0; spinNow = 0; facetAngle = 0; },
 
   draw(ctx, sig, s, frame) {
     const { w, h, t, dt } = frame;
@@ -84,8 +111,20 @@ export default {
 
     // Hysteresis: without it the count flickers when a value sits on a boundary.
     const want = Math.max(4, Math.round(s.wedges / 2) * 2);
-    if (Math.abs(want - wedgeHeld) >= 2) wedgeHeld = want;
+    // Judge the raw value, not the rounded one, so the count only steps once
+    // the hands have clearly moved past the held layout.
+    if (Math.abs(s.wedges - wedgeHeld) >= 2.5 && want !== wedgeHeld) {
+      prevWedges = wedgeHeld;
+      wedgeHeld = want;
+      fade = 0;
+    }
+    fade = Math.min(1, fade + dt / FADE_MS);
     const N = wedgeHeld;
+
+    // Ease the spin speed, then accumulate it into an angle.
+    spinNow += (s.spin - spinNow) * timeK(0.02, dt);
+    spinAngle += (dt / 1000) * spinNow * 0.35;
+    facetAngle += dt * 0.0004 * spinNow;
 
     o.setTransform(1, 0, 0, 1, 0, 0);
     o.globalCompositeOperation = 'source-over';
@@ -130,7 +169,7 @@ export default {
       const sides = 3 + Math.round(s.facet * 4);
       o.beginPath();
       for (let k = 0; k <= sides; k++) {
-        const ka = a + (k / sides) * TAU + t * 0.0004 * s.spin;
+        const ka = a + (k / sides) * TAU + facetAngle;
         const kr = size * (0.55 + ((k % 2) ? 0.55 : 0.14) * (0.4 + s.facet));
         const px = x + Math.cos(ka) * kr;
         const py = y + Math.sin(ka) * kr;
@@ -158,25 +197,16 @@ export default {
     ctx.fillStyle = `rgba(11,11,13,${1 - s.bg})`;
     ctx.fillRect(0, 0, w, h);
 
-    const step = TAU / N;
     ctx.save();
     ctx.translate(w / 2, h / 2);
-    ctx.rotate((t / 1000) * s.spin * 0.35);
+    ctx.rotate(spinAngle);
     ctx.globalCompositeOperation = 'lighter';
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    for (let i = 0; i < N; i++) {
-      ctx.save();
-      ctx.rotate(i * step);
-      if (i % 2) ctx.scale(1, -1);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, R, -step / 2, step / 2);
-      ctx.closePath();
-      ctx.clip();
-      ctx.drawImage(src, -R * 0.5, -R * 0.5, R * 1.5, R * 1.5);
-      ctx.restore();
-    }
+    // Ease the weight so the hand-off starts and ends gently.
+    const f = fade * fade * (3 - 2 * fade);
+    if (f < 1) blit(ctx, prevWedges, R, 1 - f);
+    blit(ctx, N, R, f < 1 ? f : 1);
     ctx.restore();
     ctx.globalCompositeOperation = 'source-over';
   },

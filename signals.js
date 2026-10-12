@@ -5,7 +5,7 @@
 // Every signal is continuous and bidirectional. "More" and "less" are the same
 // value moving two directions, so nothing needs a separate retract path.
 
-import { config, LM, LIMB_SETS } from './config.js';
+import { config, LM, LIMBS } from './config.js';
 import { eased } from './state.js';
 
 const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
@@ -17,16 +17,10 @@ let calibMax = 0;
 let calibStart = 0;
 let calibrated = false;
 
-// Auto mode detection ----------------------------------------------------
-let modeVisSum = 0;
-let modeVisCount = 0;
-let modeStart = 0;
-let modeResolved = false;
-
 // Signal object, allocated once and mutated in place to avoid per-frame garbage.
 //
 // The four values every style parameter can be driven by. Always read from
-// the two arm limbs specifically (never legs, even in full-body mode), so
+// the two arm limbs, so
 // "elbow angle" always means an elbow and "hand distance" always means hands.
 export const signals = {
   // frame
@@ -50,33 +44,6 @@ function angleBetween(ax, ay, bx, by, cx, cy) {
   const d = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
   if (d < 1e-6) return Math.PI;
   return Math.acos(clamp((v1x * v2x + v1y * v2y) / d, -1, 1));
-}
-
-export function resolveMode(now) {
-  if (config.mode !== 'auto') {
-    config.resolvedMode = config.mode;
-    return;
-  }
-  if (modeResolved) return;
-  if (!modeStart) modeStart = now;
-
-  const lowerVis =
-    (eased[LM.L_HIP].v + eased[LM.R_HIP].v + eased[LM.L_ANKLE].v + eased[LM.R_ANKLE].v) / 4;
-  modeVisSum += lowerVis;
-  modeVisCount++;
-
-  if (now - modeStart > config.modeDetectMs) {
-    const mean = modeVisSum / Math.max(1, modeVisCount);
-    config.resolvedMode = mean > config.modeDetectThreshold ? 'full' : 'upper';
-    modeResolved = true;
-  }
-}
-
-export function resetMode() {
-  modeResolved = false;
-  modeStart = 0;
-  modeVisSum = 0;
-  modeVisCount = 0;
 }
 
 export function computeSignals(now, dt) {
@@ -103,8 +70,8 @@ export function computeSignals(now, dt) {
   }
   signals.scale = shoulderWidth;
 
-  // Limbs. Upper body is 2, full body is 4. Renderers iterate and never ask.
-  const set = LIMB_SETS[config.resolvedMode] || LIMB_SETS.upper;
+  // Limbs. Renderers iterate and never ask how many.
+  const set = LIMBS;
   if (signals.limbs.length !== set.length) {
     signals.limbs = set.map((d) => ({ ...d, reach: 0, fold: 0, sweep: 0, lift: 0 }));
   }

@@ -34,9 +34,9 @@ Safari 16.4+, or Firefox.
 
 | File | What it is |
 |---|---|
-| `index.html` | Landing. The shifting prismatic field, the title, one arrow. |
-| `choose.html` | Full-screen chooser. All three visuals running live, before any camera. |
-| `tool.html` | The instrument. Camera gate, then the canvas and the side panel. |
+| `index.html` | Landing. The shifting prismatic field, the title, one link. |
+| `choose.html` | Full-screen chooser. All visuals running live, before any camera. Picking one opens the camera check as a popup. |
+| `tool.html` | The instrument. Takes `?style=` and `?go=camera` or `?go=watch` (sent by the popup), then shows the canvas and side panel. |
 | `?style=` | Any screen can deep-link a visual, e.g. `tool.html?style=ripples`. |
 
 ---
@@ -62,7 +62,7 @@ that looks like a rendering problem but is not.
 
 **Renderers never touch a landmark.** They read signals. This is what keeps the
 visuals from becoming copies of the pose code, and it is what makes the
-upper-body and full-body modes the same code path.
+tracking code and drawing code independent.
 
 ---
 
@@ -77,8 +77,7 @@ first few seconds and then clamped, so signals do not change when you stand
 closer to the camera.
 
 **The four signals a style parameter can be driven by**, all read from the arms
-specifically — never the legs, even in full-body mode — so each one means
-exactly what it says regardless of tracking mode:
+specifically, so each one means exactly what it says:
 
 | Signal | Range | From |
 |---|---|---|
@@ -116,15 +115,10 @@ means of these two, and are what styles actually get driven by.
 `signals.tilt` (shoulder line angle) still exists but is diagnostic only, used by
 the skeleton view — no style is driven by it.
 
-### Upper body and full body
+### Limbs
 
-A limb is a root, a hinge, and a tip. Legs are arms with different indices, so
-`signals.limbs` is 2 entries in upper-body mode and 4 in full-body mode with
-identical shape. Renderers iterate the array and never ask how long it is.
-
-Mode is detected from hip and ankle visibility over the opening seconds and can
-be overridden in the side panel. If you ever find yourself writing
-`if (mode === 'full')` inside a renderer, the signal layer is not doing its job.
+A limb is a root, a hinge, and a tip. `signals.limbs` holds the two arms.
+Renderers iterate the array and never ask how long it is.
 
 ### Three robustness requirements
 
@@ -247,7 +241,7 @@ can reach from the interface.
 ## The signal plate
 
 Press **D** while the tool is running. Every signal appears as a labelled bar and
-number, along with the resolved mode and frame rate.
+number, along with the frame rate.
 
 This is a permanent fixture rather than a development leftover. When a visual
 feels wrong, the cause is almost always a signal rather than the drawing code, so
@@ -277,7 +271,7 @@ kaleidoscope/
   style.css
 
   backdrop.js        the shifting prismatic field, shared by landing and tool
-  config.js          mode, mirroring, easing, calibration, landmark indices
+  config.js          mirroring, easing, calibration, landmark indices
   pose.js            MediaPipe, lazy loaded on click
   state.js           targets and eased, asymmetric easing, hold and decay
   signals.js         the signal layer

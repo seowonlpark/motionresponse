@@ -1,15 +1,14 @@
 // main.js
 // The render loop. Reads state, never writes pose. Pose runs on its own clock.
 
-import { config } from './config.js';
 import { easeState, isTracking } from './state.js';
-import { computeSignals, resolveMode, resetMode } from './signals.js';
+import { computeSignals } from './signals.js';
 import { startPose, stopPose } from './pose.js';
 import { byId } from './styles/index.js';
 import { resolve } from './modulation.js';
 import { createPhantom } from './phantom.js';
 import { initControls, renderControls } from './controls.js';
-import { initDebug, drawDebug } from './debug.js';
+import { initDebug, drawDebug, setDemo } from './debug.js';
 
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('view');
@@ -53,7 +52,6 @@ function loop(now) {
     sig = phantom(now);
   } else {
     easeState(dt);
-    resolveMode(now);
     sig = computeSignals(now, dt);
   }
 
@@ -74,11 +72,6 @@ function selectStyle(id) {
   renderControls(active);
 }
 
-function selectMode(mode) {
-  config.mode = mode;
-  resetMode();
-}
-
 let started = false;
 
 function enterStage() {
@@ -89,12 +82,13 @@ function enterStage() {
   stage.hidden = false;
   size();
   initDebug(stage);
-  initControls(stage, { onStyleChange: selectStyle, onModeChange: selectMode });
+  setDemo(usePhantom);
+  initControls(stage, { onStyleChange: selectStyle });
   renderControls(active);
   requestAnimationFrame(loop);
 }
 
-document.getElementById('begin').addEventListener('click', async () => {
+async function begin() {
   gate.classList.add('opening');
   try {
     await startPose((msg) => (status.textContent = msg === 'ready' ? '' : msg.toLowerCase() + '…'));
@@ -109,13 +103,18 @@ document.getElementById('begin').addEventListener('click', async () => {
     usePhantom = true;
     setTimeout(enterStage, 1200);
   }
-});
+}
 
-// Explicit way in without a camera, used by the chooser and the fallback link.
-document.getElementById('watch')?.addEventListener('click', (e) => {
-  e.preventDefault();
+// The camera check lives in a popup on the chooser, which sends us here with
+// ?go=camera or ?go=watch. Arriving without it means going back to choose.
+const go = params.get('go');
+if (go === 'watch') {
   usePhantom = true;
   enterStage();
-});
+} else if (go === 'camera') {
+  begin();
+} else {
+  location.replace('choose.html?style=' + encodeURIComponent(active.id));
+}
 
 window.addEventListener('beforeunload', stopPose);

@@ -1,12 +1,11 @@
 // controls.js
-// The side panel. Choose a visual, then four sliding bars shape it. Each bar
+// The side panel. Choose a visual, then up to four sliding bars shape it. Each bar
 // bundles a couple of the style's underlying values behind one plain
 // description and slides between the style's own default and a bolder take
 // on it — nothing here exposes a raw number.
 
 import { styles } from './styles/index.js';
-import { routeFor, setRoute, resetRoute, SIGNAL_LABELS } from './modulation.js';
-import { config } from './config.js';
+import { routeFor, setRoute } from './modulation.js';
 
 let root = null;
 let idleTimer = null;
@@ -35,22 +34,8 @@ export function renderControls(active) {
   if (!root) return;
 
   root.innerHTML = `
-    <p class="panel-head">visual</p>
     <nav class="stylelist" aria-label="visual"></nav>
-
-    <p class="panel-head">adjust</p>
-    <div class="barlist"></div>
-
-    <footer class="console-foot">
-      <label class="mode">figure
-        <select aria-label="figure">
-          <option value="auto">as detected</option>
-          <option value="upper">upper body</option>
-          <option value="full">full body</option>
-        </select>
-      </label>
-      <button class="linkish" type="button">reset</button>
-    </footer>`;
+    <div class="barlist"></div>`;
 
   // Style list
   const list = root.querySelector('.stylelist');
@@ -67,21 +52,18 @@ export function renderControls(active) {
   // Bars — up to four per style, defined alongside its schema. The signal
   // map (what movement drives what) goes right under the bar it explains.
   const barlist = root.querySelector('.barlist');
-  (active.bars || []).forEach((bar) => {
-    barlist.appendChild(buildBarRow(active, bar));
-    if (bar.kind === 'reactive') {
-      const map = buildSignalMap(active);
-      if (map) barlist.appendChild(map);
-    }
-  });
-
-  const modeSel = root.querySelector('.mode select');
-  modeSel.value = config.mode;
-  modeSel.addEventListener('change', () => root._h.onModeChange(modeSel.value));
-
-  root.querySelector('.linkish').addEventListener('click', () => {
-    resetRoute(active);
-    renderControls(active);
+  const bars = active.bars || [];
+  const sections = [
+    ['Reactivity', bars.filter((b) => b.kind === 'reactive')],
+    ['Adjust', bars.filter((b) => b.kind !== 'reactive')],
+  ];
+  sections.forEach(([title, items]) => {
+    if (!items.length) return;
+    const sec = document.createElement('section');
+    sec.className = 'barsection';
+    sec.innerHTML = `<h3 class="panel-head">${title}</h3>`;
+    items.forEach((bar) => sec.appendChild(buildBarRow(active, bar)));
+    barlist.appendChild(sec);
   });
 
   wake();
@@ -93,35 +75,16 @@ function buildBarRow(active, bar) {
   row.innerHTML = `
     <i>${bar.label}</i>
     <input type="range" class="bar" min="0" max="1" step="0.02" value="${barValue(active, bar)}">`;
+  const input = row.querySelector('.bar');
+  const paint = () => input.style.setProperty('--v', input.value);
+  paint();
+  input.addEventListener('input', paint);
 
   row.querySelector('.bar').addEventListener('input', (e) =>
     setBarValue(active, bar, parseFloat(e.target.value))
   );
 
   return row;
-}
-
-// Spells out, in plain words, exactly what "reacts to your movement" means
-// for the current visual — which of the four signals drives which parameter.
-// This was the missing piece: the reactive bar changed things, but nothing
-// said what was actually listening to what.
-function buildSignalMap(active) {
-  const groups = new Map();
-  active.schema.forEach((f) => {
-    if (!f.signal) return;
-    if (!groups.has(f.signal)) groups.set(f.signal, []);
-    groups.get(f.signal).push(f.label);
-  });
-  if (!groups.size) return null;
-
-  const list = document.createElement('ul');
-  list.className = 'signalmap';
-  groups.forEach((fieldLabels, sigId) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<b>${SIGNAL_LABELS[sigId]}</b> <span class="arrow">changes</span> ${fieldLabels.join(', ')}`;
-    list.appendChild(li);
-  });
-  return list;
 }
 
 // Reads a bar's current position (0–1) back out of the routing table, rather

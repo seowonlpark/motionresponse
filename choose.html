@@ -12,12 +12,27 @@
 <body>
 
 <header class="chooser-head">
-  <a class="backlink" href="index.html">&larr; back</a>
+  <a class="backlink" href="index.html">back</a>
   <h1>choose a visual</h1>
   <p>you can change it at any time, and reshape it from inside.</p>
 </header>
 
 <main class="grid" id="grid"></main>
+
+<dialog id="camcheck" class="camcheck" aria-labelledby="camcheck-title">
+  <form method="dialog" class="camcheck-card">
+    <button class="camcheck-close" value="cancel" aria-label="close">close</button>
+    <h2 id="camcheck-title">before you start</h2>
+    <p>Stand where the camera can see your shoulders and your hands. It reads how
+       far you reach, how sharply you fold, and which way you sweep, and gives all
+       of it back as pattern.</p>
+    <button id="camcheck-go" type="button" class="camcheck-primary">open the camera</button>
+    <p class="camcheck-fine">it uses your camera. nothing leaves this machine. nothing is recorded.</p>
+    <p class="camcheck-fine" id="camcheck-status" role="status" aria-live="polite"></p>
+    <button id="camcheck-watch" type="button" class="camcheck-link">continue without a camera</button>
+    <p class="camcheck-fine dim">once running, the D button (bottom left) shows how your movement is read</p>
+  </form>
+</dialog>
 
 <script type="module">
   import { styles } from './styles/index.js';
@@ -31,7 +46,8 @@
   styles.forEach((style, i) => {
     const a = document.createElement('a');
     a.className = 'panel';
-    a.href = `tool.html?style=${style.id}`;
+    a.href = `tool.html?style=${style.id}&go=camera`;
+    a.dataset.style = style.id;
     a.innerHTML = `
       <canvas></canvas>
       <div class="meta">
@@ -53,6 +69,40 @@
       frame: { w: 0, h: 0, t: 0 },
     });
   });
+
+  // Picking a visual opens the camera check as a popup instead of a page.
+  const dlg = document.getElementById('camcheck');
+  const stat = document.getElementById('camcheck-status');
+  let picked = styles[0].id;
+  const go = (mode) => { location.href = `tool.html?style=${picked}&go=${mode}`; };
+
+  function openCheck(id) {
+    picked = id;
+    stat.textContent = '';
+    if (!dlg.open) dlg.showModal();
+  }
+  grid.addEventListener('click', (e) => {
+    const a = e.target.closest('.panel');
+    if (!a) return;
+    e.preventDefault();
+    openCheck(a.dataset.style);
+  });
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  document.getElementById('camcheck-watch').addEventListener('click', () => go('watch'));
+  document.getElementById('camcheck-go').addEventListener('click', async () => {
+    stat.textContent = 'asking for the camera…';
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ video: true });
+      s.getTracks().forEach((t) => t.stop());
+      go('camera');
+    } catch (err) {
+      stat.textContent = err?.name === 'NotAllowedError'
+        ? 'the camera stayed shut. you can continue without it.'
+        : 'no camera here. you can continue without it.';
+    }
+  });
+  const want = new URLSearchParams(location.search).get('style');
+  if (want && styles.some((s) => s.id === want)) openCheck(want);
 
   function size() {
     const dpr = Math.min(devicePixelRatio || 1, 1.6);

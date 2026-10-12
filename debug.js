@@ -10,7 +10,7 @@ let rows = new Map();
 let skeletonCanvas = null;
 let skeletonCtx = null;
 
-// Root -> tip pairs actually used by the app (config.js LIMB_SETS), plus the
+// Root -> tip pairs actually used by the app (config.js LIMBS), plus the
 // shoulder and hip lines so the two sides read as one frame, not four limbs
 // floating loose.
 const BONES = [
@@ -19,10 +19,20 @@ const BONES = [
   [LM.R_SHOULDER, LM.R_ELBOW], [LM.R_ELBOW, LM.R_WRIST],
   [LM.L_HIP, LM.R_HIP],
   [LM.L_SHOULDER, LM.L_HIP], [LM.R_SHOULDER, LM.R_HIP],
-  [LM.L_HIP, LM.L_KNEE], [LM.L_KNEE, LM.L_ANKLE],
-  [LM.R_HIP, LM.R_KNEE], [LM.R_KNEE, LM.R_ANKLE],
 ];
 const JOINTS = [...new Set(BONES.flat())];
+
+// With no camera the demo figure drives the visuals, so there is no landmark
+// read to show: the skeleton stays empty and "calibrating" would never end.
+let demo = false;
+export function setDemo(on) {
+  demo = on;
+  if (!root) return;
+  root.querySelector('.specimen-caption').textContent = on
+    ? 'demo figure — no camera, signals are simulated'
+    : 'camera read — brightness is confidence';
+  skeletonCanvas.style.display = on ? 'none' : 'block';
+}
 
 export function initDebug(container) {
   root = document.createElement('div');
@@ -40,18 +50,37 @@ export function initDebug(container) {
   skeletonCanvas.width = 300 * dpr;
   skeletonCanvas.height = 300 * dpr;
 
+  // A visible way in: the key works, but nobody finds a key by itself.
+  toggleBtn = document.createElement('button');
+  toggleBtn.type = 'button';
+  toggleBtn.className = 'plate-toggle';
+  toggleBtn.innerHTML = '<kbd>D</kbd><span></span>';
+  toggleBtn.addEventListener('click', toggle);
+  container.appendChild(toggleBtn);
+
   setVisible(config.showDebug);
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'd' || e.key === 'D') {
-      config.showDebug = !config.showDebug;
-      setVisible(config.showDebug);
-    }
+    if (e.target.closest?.('input, select, textarea')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'd' || e.key === 'D') toggle();
   });
+}
+
+let toggleBtn = null;
+
+function toggle() {
+  config.showDebug = !config.showDebug;
+  setVisible(config.showDebug);
 }
 
 function setVisible(on) {
   if (root) root.style.display = on ? 'block' : 'none';
+  if (toggleBtn) {
+    toggleBtn.querySelector('span').textContent = on ? 'hide signal plate' : 'see how your movement is read';
+    toggleBtn.setAttribute('aria-pressed', on);
+    toggleBtn.classList.toggle('is-on', on);
+  }
 }
 
 function row(label, value, signed) {
@@ -90,7 +119,7 @@ function drawSkeleton() {
     const pa = eased[a], pb = eased[b];
     const vis = Math.min(pa.v, pb.v);
     if (vis < 0.05) return;
-    skeletonCtx.strokeStyle = `rgba(11,11,13,${0.12 + vis * 0.5})`;
+    skeletonCtx.strokeStyle = `rgba(255,255,255,${0.12 + vis * 0.5})`;
     skeletonCtx.beginPath();
     skeletonCtx.moveTo(px(pa.x), py(pa.y));
     skeletonCtx.lineTo(px(pb.x), py(pb.y));
@@ -102,7 +131,7 @@ function drawSkeleton() {
     if (p.v < 0.05) return;
     const r = w * 0.012 + p.v * w * 0.016;
     skeletonCtx.beginPath();
-    skeletonCtx.fillStyle = `rgba(11,11,13,${0.25 + p.v * 0.65})`;
+    skeletonCtx.fillStyle = `rgba(255,255,255,${0.25 + p.v * 0.65})`;
     skeletonCtx.arc(px(p.x), py(p.y), r, 0, Math.PI * 2);
     skeletonCtx.fill();
   });
@@ -111,9 +140,11 @@ function drawSkeleton() {
 export function drawDebug(signals, fps) {
   if (!config.showDebug || !root) return;
   root.querySelector('.specimen-head span').textContent =
-    `${config.resolvedMode} · ${Math.round(fps)}fps · ${signals.ready ? 'calibrated' : 'calibrating'}`;
+    demo
+      ? `demo · ${Math.round(fps)}fps`
+      : `${Math.round(fps)}fps · ${signals.ready ? 'calibrated' : 'calibrating'}`;
 
-  drawSkeleton();
+  if (!demo) drawSkeleton();
 
   row('hand speed', signals.handSpeed);
   row('hand distance', signals.handDistance);

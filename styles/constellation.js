@@ -49,10 +49,10 @@ export default {
   ],
 
   bars: [
-    { id: 'reactive', kind: 'reactive', label: 'reacts to your movement' },
-    { id: 'links',    label: 'more connections', on: { link: 0.32, degree: 5 } },
-    { id: 'warm',     label: 'warmer colour',    on: { warmth: 48, twinkle: 0.85 } },
-    { id: 'wide',     label: 'wider reach',      on: { field: 0.5 } },
+    { id: 'reactive', kind: 'reactive', label: 'react' },
+    { id: 'links',    label: 'links', on: { link: 0.32, degree: 5 } },
+    { id: 'warm',     label: 'warmth',    on: { warmth: 48, twinkle: 0.85 } },
+    { id: 'wide',     label: 'reach',      on: { field: 0.5 } },
   ],
 
   reset() { stars = null; },

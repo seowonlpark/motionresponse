@@ -6,7 +6,7 @@
 //   label    shown in the chooser and the side list
 //   caption  one line of copy
 //   defaults every tunable value. No magic numbers in draw().
-//   schema   [{ key, label, min, max, step, signal }] drives console and pad
+//   schema   [{ key, label, min, max, step, signal }] drives the side panel
 //   draw     (ctx, signals, resolvedSettings, frame) => void
 //   reset    optional, clears cached geometry on style change or resize
 

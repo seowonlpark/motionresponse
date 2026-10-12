@@ -57,8 +57,7 @@ h1 {
   max-width: 30ch;
 }
 
-/* The arrow. White by default and alone. On hover it underlines, travels,
-   and the label arrives behind it. */
+/* The link. On hover it underlines. */
 .enter {
   margin-top: clamp(3rem, 8vh, 6rem);
   display: inline-flex;
@@ -71,43 +70,18 @@ h1 {
   transition: border-color 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.glyph {
-  display: block;
-  width: 2.75rem;
-  flex: 0 0 auto;
-  color: var(--black);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.glyph svg { display: block; width: 100%; }
-
 .label {
   font-size: 0.95rem;
   font-weight: 400;
   letter-spacing: 0.01em;
   white-space: nowrap;
   color: var(--black);
-  opacity: 0;
-  transform: translateX(-0.7rem);
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .enter:hover,
 .enter:focus-visible { border-bottom-color: var(--black); }
 
-.enter:hover .glyph,
-.enter:focus-visible .glyph { transform: translateX(0.55rem); }
-
-.enter:hover .label,
-.enter:focus-visible .label { opacity: 1; transform: translateX(0); }
-
 .enter:focus-visible { outline: none; }
-
-/* Touch has no hover, so the label is simply always present. */
-@media (hover: none) {
-  .label { opacity: 1; transform: none; }
-  .enter { border-bottom-color: rgba(11, 11, 13, 0.5); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; }
